@@ -7,7 +7,7 @@
 #          -tclargs [--bit <file.bit>] [--server localhost:3121]
 # =============================================================================
 
-set bit_file "alveo_picorv32_soc.bit"
+set bit_file "alveo_boom_soc.bit"
 set hw_server "localhost:3121"
 
 if { $::argc > 0 } {

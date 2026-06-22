@@ -2,16 +2,18 @@
 
 void uart_init(void)
 {
-    /* Reset both FIFOs, then clear control register */
-    UART_CTRL = UART_CTRL_RSTTX | UART_CTRL_RSTRX;
-    UART_CTRL = 0;
+    /* Set baud-rate divisor: f_clk / baud - 1 = 100000000 / 115200 - 1 = 867 */
+    UART_DIV = UART_DIV_115200;
+    /* Enable transmitter and receiver */
+    UART_TXCTRL = UART_TXCTRL_TXEN;
+    UART_RXCTRL = UART_RXCTRL_RXEN;
 }
 
 void uart_putc(char c)
 {
-    while (UART_STAT & UART_STAT_TXFF)  /* spin while TX FIFO full */
+    while (UART_TXDATA & UART_TXDATA_FULL)  /* spin while TX FIFO full */
         ;
-    UART_TX = (uint32_t)(uint8_t)c;
+    UART_TXDATA = (uint32_t)(uint8_t)c;
 }
 
 void uart_puts(const char *s)
@@ -22,7 +24,7 @@ void uart_puts(const char *s)
 
 int uart_getc(void)
 {
-    while (!(UART_STAT & UART_STAT_RXDV))  /* spin until data available */
-        ;
-    return (int)(UART_RX & 0xFF);
+    uint32_t rx;
+    do { rx = UART_RXDATA; } while (rx & UART_RXDATA_EMPTY);
+    return (int)(rx & 0xFF);
 }
